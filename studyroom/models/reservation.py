@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import String, DateTime, func, ForeignKey, Date, Time
+from sqlalchemy import String, DateTime, func, ForeignKey, Date, Time, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
 from typing import TYPE_CHECKING
@@ -12,8 +12,9 @@ if TYPE_CHECKING:
 class Reservation(Base):
     __tablename__ = "reservations"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), primary_key=True)
-    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.room_id"), primary_key=True)
+    reservation_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"))
+    room_id: Mapped[int] = mapped_column(ForeignKey("rooms.room_id"))
     reservation_date: Mapped[datetime.date] = mapped_column(
         Date, nullable=False
     )
@@ -23,3 +24,12 @@ class Reservation(Base):
 
     user: Mapped["User"] = relationship(back_populates="reservation")
     room: Mapped["Room"] = relationship(back_populates="reservation")
+
+    __table_args__ = (
+        UniqueConstraint(
+            "room_id",
+            "reservation_date",
+            "reservation_time",
+            name="uq_room_datetime"
+        ),
+    )
