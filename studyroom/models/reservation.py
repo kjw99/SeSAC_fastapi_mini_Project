@@ -14,10 +14,10 @@ class Reservation(Base):
 
     user_id: Mapped[int] = mapped_column(ForeignKey("users.user_id"), primary_key=True)
     room_id: Mapped[int] = mapped_column(ForeignKey("rooms.room_id"), primary_key=True)
-    date: Mapped[datetime.date] = mapped_column(
+    reservation_date: Mapped[datetime.date] = mapped_column(
         Date, nullable=False
     )
-    time: Mapped[datetime.time] = mapped_column(
+    reservation_time: Mapped[datetime.time] = mapped_column(
         Time, nullable=False
     )
 

@@ -1,6 +1,7 @@
 # repositories/tag_repository.py
 from sqlalchemy import select
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from studyroom.models.tool import Tool
 
 class ToolRepository:
@@ -12,7 +13,7 @@ class ToolRepository:
         # scalars().all()을 사용하여 Tag 객체 리스트를 가져온다.
         return db.scalars(select(Tool)).all()
 
-    def find_by_name(self, db: Session, name: str):
-        return db.scalar(select(Tool).where(Tool.name == name))
+    async def find_by_name(self, db: AsyncSession, name: str):
+        return await db.scalar(select(Tool).where(Tool.name == name))
 
 tool_repository = ToolRepository()

@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from studyroom.repositories.user_repository import user_repository
 from studyroom.models.user import User
 from studyroom.schemas.user import UserCreate, UserLogin
+from studyroom.schemas.reservation import ReservationCreate
 
 load_dotenv()
 SECRET_KEY = os.getenv("JWT_SECRET_KEY")
@@ -109,6 +110,5 @@ class UserService:
             )
 
         return user
-
 
 user_service = UserService()

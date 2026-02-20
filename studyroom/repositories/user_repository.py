@@ -14,8 +14,8 @@ class UserRepository:
         result = await db.scalars(stmt)
         return result.first()
 
-    async def find_by_id(self, db: AsyncSession, user_id: int):
-        return await db.get(User, user_id)
+    def find_by_id(self, db: Session, user_id: int):
+        return db.get(User, user_id)
 
 
 user_repository = UserRepository()

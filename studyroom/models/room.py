@@ -16,9 +16,10 @@ class Room(Base):
     __tablename__ = "rooms"
 
     room_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    name: Mapped[str] = mapped_column(String(50), nullable=False)
+    name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     max_people: Mapped[int] = mapped_column(nullable=False)
     location: Mapped[str] = mapped_column(String(50), nullable=False)
+    score_avg: Mapped[float] = mapped_column(default=0.0)
 
     reservation: Mapped[list["Reservation"]] = relationship(
         back_populates="room", cascade="all, delete-orphan"

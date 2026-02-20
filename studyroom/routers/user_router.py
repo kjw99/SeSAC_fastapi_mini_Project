@@ -12,6 +12,7 @@ from studyroom.schemas.user import (
     UserLogin,
     TokenResponse,
 )
+from studyroom.schemas.reservation import ReservationCreate
 
 router = APIRouter(prefix="/user", tags=["User"])
 

@@ -1,6 +1,7 @@
 # repositories/post_repository.py
 
 from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from studyroom.models.room import Room
 from studyroom.models.room_tool import RoomTool
@@ -19,19 +20,26 @@ class RoomRepository:
     def find_all_with_tools(self, db: Session):
         stmt = select(Room).options(selectinload(Room.rooms_tools).joinedload(RoomTool.tool))
         return db.scalars(stmt).all()
-
-    def find_by_id(self, db: Session, room_id: int):
+    
+    async def find_by_id(self, db: AsyncSession, room_id: int):
         # 기본키(Primary Key)를 이용한 조회는 db.get이 가장 빠르고 효율적이다.
-        return db.get(Room, room_id)
+        return await db.get(Room, room_id)
+    
+    async def find_by_id_with_tools(self, db: AsyncSession, room_id: int):
+        stmt = select(Room).where(Room.room_id == room_id).options(
+            selectinload(Room.rooms_tools).selectinload(RoomTool.tool)
+        )
+        return await db.scalar(stmt)
 
-    # def update(self, db: Session, room: Room, data: RoomCreate):
-    #     # 이미 조회된 객체의 속성을 변경하면 세션이 이를 감지한다.
-    #     post.title = data.title
-    #     post.content = data.content
-    #     return room
+    async def update(self, db: AsyncSession, room: Room, data: RoomCreate):
+        # 이미 조회된 객체의 속성을 변경하면 세션이 이를 감지한다.
+        room.name = data.name
+        room.max_people = data.max_people
+        room.location = data.location        
+        return room
 
-    # def delete(self, db: Session, room: Room):
-    #     # 세션에서 해당 객체를 삭제 대상으로 표시한다.
-    #     db.delete(room)
+    async def delete(self, db: AsyncSession, room: Room):
+        # 세션에서 해당 객체를 삭제 대상으로 표시한다.
+        await db.delete(room)
 
 room_repository = RoomRepository()
