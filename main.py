@@ -6,7 +6,7 @@ from studyroom.routers.user_router import router as user_router
 from studyroom.routers.tool_router import router as tool_router
 from studyroom.routers.room_router import router as room_router
 from studyroom.routers.reservation_router import router as reservation_router
-
+from studyroom.routers.review_router import router as review_router
 # 기존 테이블 지우기
 # models.Base.metadata.drop_all(bind=engine)
 
@@ -19,7 +19,7 @@ app.include_router(user_router)
 app.include_router(room_router)
 app.include_router(tool_router)
 app.include_router(reservation_router)
-
+app.include_router(review_router)
 @app.get("/")
 def read_root():
     return "main fastapi"

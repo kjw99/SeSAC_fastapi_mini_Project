@@ -17,8 +17,17 @@ class RoomRepository:
         # select 문을 생성하고 scalars를 통해 결과 객체들을 리스트로 가져온다.
         return db.scalars(select(Room)).all()
     
-    def find_all_with_tools(self, db: Session):
+    def find_all_with_tools(
+        self,
+        db: Session,
+        location: str | None = None,
+        max_people: int | None = None,
+    ):
         stmt = select(Room).options(selectinload(Room.rooms_tools).joinedload(RoomTool.tool))
+        if location is not None:
+            stmt = stmt.where(Room.location.contains(location))
+        if max_people is not None:
+            stmt = stmt.where(Room.max_people == max_people)
         return db.scalars(stmt).all()
     
     async def find_by_id(self, db: AsyncSession, room_id: int):

@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .reservation import Reservation
-    from .review import Review
 
 class User(Base):
     __tablename__ = "users"
@@ -19,9 +18,5 @@ class User(Base):
     phone: Mapped[str] = mapped_column(String(13), nullable=False)    
 
     reservation: Mapped[list["Reservation"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan"
-    )
-
-    reviews: Mapped[list["Review"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )

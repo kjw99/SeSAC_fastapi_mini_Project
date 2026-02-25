@@ -10,7 +10,6 @@ if TYPE_CHECKING:
     from .room_tool import RoomTool
     from .tool import Tool
     from .reservation import Reservation
-    from .review import Review
 
 class Room(Base):
     __tablename__ = "rooms"
@@ -26,10 +25,6 @@ class Room(Base):
     )
 
     rooms_tools: Mapped[list["RoomTool"]] = relationship(
-        back_populates="room", cascade="all, delete-orphan"
-    )
-
-    reviews: Mapped[list["Review"]] = relationship(
         back_populates="room", cascade="all, delete-orphan"
     )
 

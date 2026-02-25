@@ -16,3 +16,15 @@ class ReservationSlot(BaseModel):
 class ReservationReadResponse(BaseModel):
     reservation_date: date
     slots: list[ReservationSlot]
+
+
+class MyReservationItem(BaseModel):
+    reservation_id: int
+    name: str
+    date: date
+    time: str
+    state: bool
+
+    @field_serializer("date")
+    def serialize_date(self, value: date):
+        return value.strftime("%Y-%m-%d")

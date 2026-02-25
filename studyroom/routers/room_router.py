@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from database import get_db
@@ -20,8 +20,12 @@ async def create_room(
     return await room_service.create_room(db, data, current_user)
 
 @router.get("", response_model=list[RoomResponse])
-def read_rooms(db: Session = Depends(get_db)):
-    return room_service.read_rooms(db)
+def read_rooms(
+    db: Session = Depends(get_db),
+    location: str | None = Query(None, description="층 필터 (예: 4층, 5층)"),
+    max_people: int | None = Query(None, description="최대 인원 필터"),
+):
+    return room_service.read_rooms(db, location=location, max_people=max_people)
 
 @router.put("/{room_id}", response_model=RoomResponse)
 async def update_post(

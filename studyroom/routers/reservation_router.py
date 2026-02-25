@@ -7,7 +7,7 @@ from studyroom.dependencies import get_current_user
 from studyroom.services.reservation_service import reservation_service
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
-from studyroom.schemas.reservation import ReservationCreate, ReservationReadResponse
+from studyroom.schemas.reservation import ReservationCreate, ReservationReadResponse, MyReservationItem
 
 router = APIRouter(prefix="/reservation", tags=["reservation"])
 
@@ -20,6 +20,15 @@ async def add_room_reservation(
 ):
     return await reservation_service.add_room_reservation(db, room_id, data, current_user)
 
+
+@router.get("/me", response_model=list[MyReservationItem])
+async def get_my_reservations(
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Depends(get_current_user),
+):
+    return await reservation_service.get_my_reservations(db, current_user)
+
+
 @router.get("/{room_id}", response_model=ReservationReadResponse)
 async def read_room_reservation(
     room_id: int, 
@@ -28,3 +37,11 @@ async def read_room_reservation(
     current_user: User = Depends(get_current_user)
 ):
     return await reservation_service.read_room_reservation(db, room_id, target_date)
+
+@router.delete("/{reservation_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_reservation(
+    reservation_id: int,
+    db: AsyncSession = Depends(get_async_db),
+    current_user: User = Depends(get_current_user)
+):
+    return await reservation_service.delete_reservation(db, reservation_id, current_user)

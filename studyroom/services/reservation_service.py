@@ -1,4 +1,4 @@
-from datetime import time, date
+from datetime import time, date, datetime, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
@@ -7,10 +7,30 @@ from studyroom.repositories.reservation_repository import reservation_repository
 from studyroom.repositories.room_repository import room_repository
 from studyroom.models.user import User
 from studyroom.models.reservation import Reservation
-from studyroom.schemas.reservation import ReservationCreate, ReservationSlot, ReservationReadResponse
+from studyroom.schemas.reservation import ReservationCreate, ReservationSlot, ReservationReadResponse, MyReservationItem
 
 class ReservationService:    
     async def add_room_reservation(self, db: AsyncSession, room_id: int, data: ReservationCreate, current_user: User):
+        
+        if data.reservation_date < date.today():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="오늘 이전의 날짜는 예약할 수 없습니다."
+            )
+        
+        if data.reservation_time < datetime.now().time():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="현재 시간 이전의 시간은 예약할 수 없습니다."
+            )
+        reservation_datetime = datetime.combine(data.reservation_date, data.reservation_time)
+
+        if reservation_datetime < datetime.now() + timedelta(hours=1):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="예약은 1시간 이후부터 가능합니다."
+            )
+        
         try:
             async with db.begin():
                 room = await room_repository.find_by_id_with_tools(db, room_id)
@@ -50,5 +70,36 @@ class ReservationService:
         
         return ReservationReadResponse(reservation_date=target_date, slots=times)
 
+    async def get_my_reservations(self, db: AsyncSession, current_user: User) -> list[MyReservationItem]:
+        async with db.begin():
+            reservations = await reservation_repository.find_all_by_user_id(db, current_user.user_id)
+        now = datetime.now()
+        items = []
+        for r in reservations:
+            end_datetime = datetime.combine(r.reservation_date, r.reservation_time) + timedelta(hours=1)
+            time_str = f"{r.reservation_time.strftime('%H:%M')} ~ {end_datetime.time().strftime('%H:%M')}"
+            state = end_datetime > now
+            items.append(
+                MyReservationItem(
+                    reservation_id=r.reservation_id,
+                    name=r.room.name,
+                    date=r.reservation_date,
+                    time=time_str,
+                    state=state,
+                )
+            )
+        return items
+
+    async def delete_reservation(self, db: AsyncSession, reservation_id: int, current_user: User):
+        async with db.begin():
+            reservation = await reservation_repository.find_by_id_with_user(db, reservation_id, current_user.user_id)
+            if not reservation:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="존재하지 않는 예약입니다."
+                )
+            await reservation_repository.delete(db, reservation)
+        
+        return {"message" : "예약 취소 완료"}
 
 reservation_service = ReservationService()

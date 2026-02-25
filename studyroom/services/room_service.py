@@ -42,8 +42,13 @@ class RoomService:
         new_room = await room_repository.find_by_id_with_tools(db, new_room.room_id)
         return new_room
     
-    def read_rooms(self, db: Session):
-        return room_repository.find_all_with_tools(db)
+    def read_rooms(
+        self,
+        db: Session,
+        location: str | None = None,
+        max_people: int | None = None,
+    ):
+        return room_repository.find_all_with_tools(db, location=location, max_people=max_people)
 
     async def read_room_by_id(self, db: AsyncSession, room_id: int):
         room = await room_repository.find_by_id(db, room_id)

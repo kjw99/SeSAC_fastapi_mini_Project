@@ -3,11 +3,12 @@ from datetime import datetime
 from sqlalchemy import String, DateTime, func, ForeignKey, Date, Time, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database import Base
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from .user import User
     from .room import Room
+    from .review import Review
 
 class Reservation(Base):
     __tablename__ = "reservations"
@@ -24,6 +25,9 @@ class Reservation(Base):
 
     user: Mapped["User"] = relationship(back_populates="reservation")
     room: Mapped["Room"] = relationship(back_populates="reservation")
+    review: Mapped[Optional["Review"]] = relationship(
+        back_populates="reservation", uselist=False, cascade="all, delete-orphan"
+    )
 
     __table_args__ = (
         UniqueConstraint(
